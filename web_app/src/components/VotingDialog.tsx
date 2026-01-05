@@ -21,7 +21,7 @@ interface VotingDialogProps {
 
 export function VotingDialog({ open, onOpenChange, photo }: VotingDialogProps) {
     const { user } = useStore();
-    const [score, setScore] = useState([5]);
+    const [score, setScore] = useState<number | null>(null);
     const [comment, setComment] = useState("");
     const [loading, setLoading] = useState(false);
     const [existingVote, setExistingVote] = useState<any>(null);
@@ -36,11 +36,11 @@ export function VotingDialog({ open, onOpenChange, photo }: VotingDialogProps) {
                 if (voteSnap.exists()) {
                     const data = voteSnap.data();
                     setExistingVote(data);
-                    setScore([data.score]);
+                    setScore(data.score);
                     setComment(data.comment || "");
                 } else {
                     setExistingVote(null);
-                    setScore([5]);
+                    setScore(null);
                     setComment("");
                 }
             };
@@ -49,7 +49,10 @@ export function VotingDialog({ open, onOpenChange, photo }: VotingDialogProps) {
     }, [open, user, photo]);
 
     const handleSave = async () => {
-        if (!user || !photo) return;
+        if (!user || !photo || score === null) {
+            toast.error("Lütfen bir puan seçin");
+            return;
+        }
         setLoading(true);
 
         const voteId = `${photo.id}_${user.email}`;
@@ -65,7 +68,7 @@ export function VotingDialog({ open, onOpenChange, photo }: VotingDialogProps) {
                 }
 
                 const currentScore = existingVote ? existingVote.score : 0;
-                const scoreDiff = score[0] - currentScore;
+                const scoreDiff = score - currentScore;
 
                 // Update photo stats
                 const newTotalScore = (sfDoc.data().totalScore || 0) + scoreDiff;
@@ -80,7 +83,7 @@ export function VotingDialog({ open, onOpenChange, photo }: VotingDialogProps) {
                 transaction.set(voteRef, {
                     photoId: photo.id,
                     juryEmail: user.email,
-                    score: score[0],
+                    score: score,
                     comment: comment,
                     timestamp: serverTimestamp()
                 });
@@ -90,7 +93,7 @@ export function VotingDialog({ open, onOpenChange, photo }: VotingDialogProps) {
                     action: existingVote ? "UPDATE_VOTE" : "VOTE",
                     user: user.email,
                     photoId: photo.id,
-                    score: score[0],
+                    score: score,
                     timestamp: serverTimestamp()
                 });
             });
@@ -109,68 +112,85 @@ export function VotingDialog({ open, onOpenChange, photo }: VotingDialogProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl w-full h-[90vh] bg-neutral-900 border-neutral-800 text-white flex flex-col md:flex-row gap-6 p-6">
+            <DialogContent className="fixed !z-50 !left-0 !top-0 !right-0 !bottom-0 !w-screen !h-screen !max-w-none !translate-x-0 !translate-y-0 border-none bg-black p-0 shadow-none focus:outline-none data-[state=open]:!slide-in-from-left-0 data-[state=open]:!slide-in-from-top-0 rounded-none">
 
-                {/* Image Section */}
-                <div className="flex-1 relative bg-black/50 rounded-lg overflow-hidden flex items-center justify-center">
-                    <div className="relative w-full h-full min-h-[300px]">
+                {/* Close Button Overlay */}
+                <button
+                    onClick={() => onOpenChange(false)}
+                    className="absolute top-6 left-6 z-50 p-3 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 rounded-full transition-colors"
+                >
+                    <span className="sr-only">Kapat</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+
+                {/* 1. LAYER: Full Screen Image (Modified to fit in free space) */}
+                <div className="absolute inset-0 w-full h-full z-0 bg-black flex items-center justify-center md:pr-[380px]">
+                    <div className="relative w-full h-full p-4">
                         <Image
                             src={photo.url}
                             alt={photo.id}
                             fill
                             className="object-contain"
+                            priority
+                            sizes="(max-width: 768px) 100vw, calc(100vw - 380px)"
                         />
                     </div>
                 </div>
 
-                {/* Controls Section */}
-                <div className="w-full md:w-80 flex flex-col gap-6">
-                    <DialogHeader>
-                        <DialogTitle>{photo.id}</DialogTitle>
+                {/* 2. LAYER: Controls Overlay (Right Side) */}
+                <div className="absolute right-0 top-0 bottom-0 w-full md:w-[380px] z-10 bg-neutral-900/90 backdrop-blur-md border-l border-white/10 flex flex-col p-6 shadow-2xl transition-transform duration-300">
+                    <DialogHeader className="mb-6 shrink-0">
+                        <DialogTitle className="text-xl font-mono text-neutral-200 truncate pr-8">{photo.id}</DialogTitle>
                         <DialogDescription className="text-neutral-400">
-                            Lütfen bu fotoğrafı 1 ile 10 arasında puanlayın.
+                            Puanınızı seçin ve yorumunuzu ekleyin.
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <div className="flex justify-between">
-                                <Label>Puan</Label>
-                                <span className="text-xl font-bold text-white">{score[0]}</span>
+                    <div className="flex-1 space-y-8 overflow-y-auto pr-2 custom-scrollbar">
+                        {/* Vote Buttons 1-5 */}
+                        <div className="space-y-4">
+                            <Label className="text-lg text-white">Puan</Label>
+                            <div className="grid grid-cols-5 gap-2">
+                                {[1, 2, 3, 4, 5].map((v) => (
+                                    <Button
+                                        key={v}
+                                        variant={score === v ? "default" : "outline"}
+                                        className={`h-14 text-xl font-bold transition-all ${score === v
+                                            ? "bg-white text-black hover:bg-neutral-200 scale-105 shadow-lg border-transparent"
+                                            : "bg-transparent border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                                            }`}
+                                        onClick={() => setScore(v)}
+                                    >
+                                        {v}
+                                    </Button>
+                                ))}
                             </div>
-                            <Slider
-                                value={score}
-                                onValueChange={setScore}
-                                max={10}
-                                min={1}
-                                step={1}
-                                className="py-4"
-                            />
-                            <div className="flex justify-between text-xs text-neutral-500 px-1">
-                                <span>1</span>
-                                <span>5</span>
-                                <span>10</span>
+                            <div className="flex justify-between px-1 text-xs text-neutral-500 uppercase tracking-widest font-medium">
+                                <span>Kötü</span>
+                                <span>Mükemmel</span>
                             </div>
                         </div>
 
+                        {/* Optional Comment */}
                         <div className="space-y-2">
-                            <Label>Yorum (Opsiyonel)</Label>
+                            <Label className="text-white">Yorum (Opsiyonel)</Label>
                             <Textarea
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
-                                className="bg-neutral-950 border-neutral-800 resize-none h-32"
-                                placeholder="..."
+                                className="bg-black/30 border-neutral-700 resize-none h-40 focus:border-neutral-500 focus:ring-0 text-neutral-200 placeholder:text-neutral-600"
+                                placeholder="Fotoğraf hakkında düşünceleriniz..."
                             />
                         </div>
                     </div>
 
-                    <DialogFooter className="mt-auto sm:justify-start">
+                    <DialogFooter className="mt-6 pt-6 border-t border-white/10 shrink-0">
                         <Button
-                            className="w-full bg-white text-black hover:bg-neutral-200"
+                            size="lg"
+                            className="w-full bg-white text-black hover:bg-neutral-200 font-bold text-lg h-14 shadow-lg transition-transform active:scale-[0.98]"
                             onClick={handleSave}
-                            disabled={loading}
+                            disabled={loading || score === null}
                         >
-                            {loading ? "Kaydediliyor..." : (existingVote ? "Oyu Güncelle" : "Oyu Kaydet")}
+                            {loading ? "Kaydediliyor..." : (existingVote ? "Oyu Güncelle" : "OYU GÖNDER")}
                         </Button>
                     </DialogFooter>
                 </div>

@@ -25,7 +25,8 @@ if (!firebaseConfig.apiKey) {
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
-const db = getFirestore(app);
+// Explicitly connect to the 'foto' database
+const db = getFirestore(app, 'foto');
 const storage = getStorage(app);
 
 export { app, auth, db, storage };

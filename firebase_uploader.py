@@ -1,5 +1,6 @@
 import firebase_admin
-from firebase_admin import credentials, firestore, storage
+from firebase_admin import credentials, storage
+from google.cloud import firestore
 import os
 
 # --- KONFIGURASYON ---
@@ -8,10 +9,10 @@ SERVICE_ACCOUNT_PATH = 'serviceAccountKey.json'
 
 # Firebase Storage Bucket adiniz (gs:// olmadan)
 # Ornek: 'proje-id.appspot.com'
-BUCKET_NAME = 'YOUR_BUCKET_NAME.appspot.com'
+BUCKET_NAME = 'fotografyarismasi-192c3.firebasestorage.app'
 
 # Fotograflarin bulundugu klasor
-SOURCE_FOLDER = '_JURI_OYLAMA_HAVUZU'
+SOURCE_FOLDER = '_JURI_OYLAMA_HAVUZU'   
 
 def upload_photos():
     # 1. Firebase Baglantisi
@@ -20,12 +21,14 @@ def upload_photos():
         print("Lutfen Firebase Service Account JSON dosyasini bu scriptin yanina koyun veya yolunu duzeltin.")
         return
 
+    # Initialize Firebase Admin for Storage
     cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
     firebase_admin.initialize_app(cred, {
         'storageBucket': BUCKET_NAME
     })
 
-    db = firestore.client()
+    # Initialize Firestore Client explicitly for the named database 'foto'
+    db = firestore.Client.from_service_account_json(SERVICE_ACCOUNT_PATH, database='foto')
     bucket = storage.bucket()
 
     # 2. Klasoru Tara

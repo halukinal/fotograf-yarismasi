@@ -70,13 +70,13 @@ export default function LoginPage() {
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
 
-            const hasAccess = await checkJuryAccess(user.email!);
-            if (!hasAccess) {
-                toast.error("Giriş yetkiniz bulunmamaktadır.");
-                await auth.signOut();
-                setLoading(false);
-                return;
-            }
+            //const hasAccess = await checkJuryAccess(user.email!);
+            //if (!hasAccess) {
+            //    toast.error("Giriş yetkiniz bulunmamaktadır.");
+            //    await auth.signOut();
+            //    setLoading(false);
+            //    return;
+            //}
 
             setUser(user);
             toast.success("Giriş başarılı!");
