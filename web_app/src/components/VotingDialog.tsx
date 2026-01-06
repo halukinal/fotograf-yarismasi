@@ -153,52 +153,54 @@ export function VotingDialog({ open, onOpenChange, photo }: VotingDialogProps) {
                                 {/* Vote Buttons 1-5 */}
                                 <div className="space-y-4">
                                     <Label className="text-lg text-white">Puan</Label>
-                                    <div className="grid grid-cols-5 gap-2">
-                                        {[1, 2, 3, 4, 5].map((v) => (
+                                    <div className="grid grid-cols-5 gap-1 md:gap-2">
+                                        {[
+                                            { val: 1, label: "Yetersiz" },
+                                            { val: 2, label: "Gelişmeli" },
+                                            { val: 3, label: "Orta" },
+                                            { val: 4, label: "İyi" },
+                                            { val: 5, label: "Mükemmel" }
+                                        ].map((item) => (
                                             <Button
-                                                key={v}
-                                                variant={score === v ? "default" : "outline"}
-                                                className={`h-12 md:h-14 text-lg md:text-xl font-bold transition-all ${score === v
+                                                key={item.val}
+                                                variant={score === item.val ? "default" : "outline"}
+                                                className={`h-16 md:h-20 flex flex-col items-center justify-center gap-1 transition-all p-1 ${score === item.val
                                                     ? "bg-white text-black hover:bg-neutral-200 scale-105 shadow-lg border-transparent"
                                                     : "bg-transparent border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white"
                                                     }`}
-                                                onClick={() => setScore(v)}
+                                                onClick={() => setScore(item.val)}
                                             >
-                                                {v}
+                                                <span className="text-xl md:text-2xl font-bold leading-none">{item.val}</span>
+                                                <span className="text-[9px] md:text-[10px] uppercase tracking-tighter font-medium leading-none">{item.label}</span>
                                             </Button>
                                         ))}
                                     </div>
-                                    <div className="flex justify-between px-1 text-xs text-neutral-500 uppercase tracking-widest font-medium">
-                                        <span>Kötü</span>
-                                        <span>Mükemmel</span>
+
+                                    {/* Optional Comment */}
+                                    <div className="space-y-2">
+                                        <Label className="text-white">Yorum (Opsiyonel)</Label>
+                                        <Textarea
+                                            value={comment}
+                                            onChange={(e) => setComment(e.target.value)}
+                                            className="bg-black/30 border-neutral-700 resize-none h-24 md:h-40 focus:border-neutral-500 focus:ring-0 text-neutral-200 placeholder:text-neutral-600"
+                                            placeholder="Fotoğraf hakkında düşünceleriniz..."
+                                        />
                                     </div>
                                 </div>
 
-                                {/* Optional Comment */}
-                                <div className="space-y-2">
-                                    <Label className="text-white">Yorum (Opsiyonel)</Label>
-                                    <Textarea
-                                        value={comment}
-                                        onChange={(e) => setComment(e.target.value)}
-                                        className="bg-black/30 border-neutral-700 resize-none h-24 md:h-40 focus:border-neutral-500 focus:ring-0 text-neutral-200 placeholder:text-neutral-600"
-                                        placeholder="Fotoğraf hakkında düşünceleriniz..."
-                                    />
-                                </div>
+                                <DialogFooter className="mt-4 pt-4 border-t border-white/10 shrink-0">
+                                    <Button
+                                        size="lg"
+                                        className="w-full bg-white text-black hover:bg-neutral-200 font-bold text-lg h-12 md:h-14 shadow-lg transition-transform active:scale-[0.98]"
+                                        onClick={handleSave}
+                                        disabled={loading || score === null}
+                                    >
+                                        {loading ? "Kaydediliyor..." : (existingVote ? "Oyu Güncelle" : "OYU GÖNDER")}
+                                    </Button>
+                                </DialogFooter>
                             </div>
-
-                            <DialogFooter className="mt-4 pt-4 border-t border-white/10 shrink-0">
-                                <Button
-                                    size="lg"
-                                    className="w-full bg-white text-black hover:bg-neutral-200 font-bold text-lg h-12 md:h-14 shadow-lg transition-transform active:scale-[0.98]"
-                                    onClick={handleSave}
-                                    disabled={loading || score === null}
-                                >
-                                    {loading ? "Kaydediliyor..." : (existingVote ? "Oyu Güncelle" : "OYU GÖNDER")}
-                                </Button>
-                            </DialogFooter>
                         </div>
                     </div>
-                </div>
 
             </DialogContent>
         </Dialog>
