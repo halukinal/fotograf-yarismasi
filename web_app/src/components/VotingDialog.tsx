@@ -201,6 +201,7 @@ export function VotingDialog({ open, onOpenChange, photo }: VotingDialogProps) {
                             </div>
                         </div>
                     </div>
+                </div>
 
             </DialogContent>
         </Dialog>
