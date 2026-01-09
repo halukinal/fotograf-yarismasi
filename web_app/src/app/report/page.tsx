@@ -39,7 +39,17 @@ export default function ReportPage() {
         const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
             setIsLoading(false);
-            if (!currentUser) router.push("/login");
+            if (!currentUser) {
+                router.push("/login");
+                return;
+            }
+
+            // Access Check
+            const allowedEmails = ["amil.ucbas@yuzuncuyil.juri", "haluk.inal@yuzuncuyil.juri"];
+            if (!currentUser.email || !allowedEmails.includes(currentUser.email)) {
+                // toast.error("Bu sayfaya erişim yetkiniz yok."); // Optional: show toast
+                router.push("/");
+            }
         });
         return () => unsubAuth();
     }, [setUser, setIsLoading, router]);
@@ -174,8 +184,8 @@ export default function ReportPage() {
                                                             </td>
                                                             <td className="px-4 py-2 text-right">
                                                                 <span className={`font-bold px-2 py-1 rounded ${vote.score >= 4 ? 'bg-green-900/40 text-green-400' :
-                                                                        vote.score >= 3 ? 'bg-yellow-900/40 text-yellow-400' :
-                                                                            'bg-red-900/40 text-red-400'
+                                                                    vote.score >= 3 ? 'bg-yellow-900/40 text-yellow-400' :
+                                                                        'bg-red-900/40 text-red-400'
                                                                     }`}>
                                                                     {vote.score}
                                                                 </span>

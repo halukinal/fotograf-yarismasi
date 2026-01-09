@@ -33,7 +33,12 @@ export default function AdminPage() {
             // Debug logging
             console.log("Current User:", currentUser.email);
 
-            // Access allowed for all logged-in users
+            // Access Check
+            const allowedEmails = ["amil.ucbas@yuzuncuyil.juri", "haluk.inal@yuzuncuyil.juri"];
+            if (!currentUser.email || !allowedEmails.includes(currentUser.email)) {
+                toast.error("Bu sayfaya erişim yetkiniz yok.");
+                router.push("/");
+            }
         });
 
         return () => unsubAuth();
