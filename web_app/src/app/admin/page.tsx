@@ -119,6 +119,9 @@ export default function AdminPage() {
                     🏆 Yarışma Sonuçları
                 </h1>
                 <div className="flex gap-4">
+                    <Button variant="outline" onClick={() => router.push("/report")} className="border-indigo-800 text-indigo-400 hover:bg-indigo-950">
+                        📊 Detaylı Rapor
+                    </Button>
                     <Button variant="outline" onClick={() => router.push("/")} className="border-neutral-800 hover:bg-neutral-900 text-neutral-300">
                         Galeriye Dön
                     </Button>
