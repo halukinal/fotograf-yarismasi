@@ -91,6 +91,13 @@ export default function GalleryPage() {
 
         <div className="flex items-center gap-4">
           <span className="text-sm text-neutral-400 hidden sm:inline-block">{user.email}</span>
+          <Button
+            variant="default"
+            onClick={() => router.push("/admin")}
+            className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold"
+          >
+            🏆 Kazananlar
+          </Button>
           <Button variant="outline" onClick={() => auth.signOut()} className="border-neutral-800 hover:bg-neutral-800">
             Çıkış Yap
           </Button>

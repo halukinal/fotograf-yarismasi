@@ -8,7 +8,7 @@ const geistMono = Geist_Mono({ subsets: ["latin"] });
 const playfair = Playfair_Display({ subsets: ["latin"] });
 
 // Target Date: Jan 9, 2026 14:00:00 (Turkey Time GMT+3)
-const TARGET_DATE = new Date("2026-01-09T14:00:00+03:00").getTime();
+const TARGET_DATE = new Date("2026-01-09T11:00:00+03:00").getTime();
 
 const QUOTES = [
     { text: "Sabır, boyun eğmek değil, mücadele etmektir.", author: "Hz. Ömer" },
